@@ -3,75 +3,175 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
     <title>eXchange</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.css">
-
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <link href="css/products.css" rel="stylesheet" />
 </head>
 
-<body class="site">
-    <main class="site-container" id="app">
+<body>
 
-        <section class="hero is-infos">
-            <div class="hero-body">
-                <div class="container">
-                    <h1 class="title">
-                        eXchange
-                    </h1>
-                    <h2 class="subtitle">
-                        v1.0.0
-                    </h2>
-                </div>
-            </div>
-        </section>
-
-        <div class="container">
-            <div class="notification">
-                <div class="box">
-                    <div class="field">
-                        <p class="control has-icons-left has-icons-right">
-                            <input class="input" type="email" placeholder="Email">
-                            <span class="icon is-small is-left">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <span class="icon is-small is-right">
-                                <i class="fas fa-check"></i>
-                            </span>
-                        </p>
-                    </div>
-                    <div class="field">
-                        <p class="control has-icons-left">
-                            <input class="input" type="password" placeholder="Password">
-                            <span class="icon is-small is-left">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                        </p>
-                    </div>
-                    <div class="field">
-                        <p class="control">
-                            <button class="button is-success">
-                                Login
-                            </button>
-                        </p>
-                    </div>
-                </div>
+    <section class="hero is-info">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="title">
+                    eXchange
+                </h1>
+                <h2 class="subtitle">
+                    v1.0.0
+                </h2>
             </div>
         </div>
-    </main>
+    </section>
 
-    <footer class="footer">
-        <div class="content has-text-centered">
-            <p>
-                <strong>Bulma</strong> by <a href="https://jgthms.com">Jeremy Thomas</a>. The source code is licensed
-                <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
-                is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
-            </p>
+    <div class="container">
+        <h1>Product CRUD</h1>
+        <main id="app">
+            <router-view></router-view>
+        </main>
+    </div>
+
+    <template id="product">
+        <div>
+            <h2>{{ product.nameproduct }}</h2>
+            <b>Description: </b>
+            <div>{{ product.amountproduct }}</div>
+            <b>Price:</b>
+            <div>{{ product.productvalue }}<span class="glyphicon glyphicon-euro"></span></div>
+            <br />
+            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+            <a>
+                <router-link to="/">Back to product list</router-link>
+            </a>
         </div>
-    </footer>
+    </template>
 
-    <!-- development version, includes helpful console warnings -->
+    <template id="product-list">
+        <div>
+            <div class="actions">
+                <a class="btn btn-default">
+                    <router-link :to="{path: '/add-product'}">
+                        <span class="glyphicon glyphicon-plus"></span>
+                        Add product
+                    </router-link>
+                </a>
+            </div>
+            <div class="filters row">
+                <div class="form-group col-sm-3">
+                    <input placeholder="Search" v-model="searchKey" class="form-control" id="search-element" requred />
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th class="col-sm-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="product in filteredProducts">
+                        <!-- tr v-for="product in products" -->
+                        <!-- tr v-for="product in products | filterBy searchKey in 'name'" -->
+                        <td>
+                            <a>
+                                <router-link :to="{name: 'product', params: {product_id: product.id}}">
+                                    {{ product.nameproduct }}</router-link>
+                            </a>
+                        </td>
+                        <td>{{ product.amountproduct }}</td>
+                        <td>
+                            {{ product.productvalue }}
+                            <span class="glyphicon glyphicon-euro" aria-hidden="true"></span>
+                        </td>
+                        <td>
+                            <a class="buttons button is-info">
+                                <router-link :to="{name: 'product-edit', params: {product_id: product.id}}">Edit
+                                </router-link>
+                            </a>
+                            <a class="button is-danger">
+                                <router-link :to="{name: 'product-delete', params: {product_id: product.id}}">Delete
+                                </router-link>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+
+    <template id="add-product">
+        <div>
+            <h2>Add new product</h2>
+            <form @submit="createProduct">
+                <div class="form-group">
+                    <label for="add-name">Name</label>
+                    <input class="form-control" id="add-name" v-model="product.nameproduct" required />
+                </div>
+                <div class="form-group">
+                    <label for="add-description">Description</label>
+                    <textarea class="form-control" id="add-description" rows="10"
+                        v-model="product.amountproduct"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="add-price">Price, <span class="glyphicon glyphicon-euro"></span></label>
+                    <input type="number" class="form-control" id="add-price" v-model="product.productvalue" />
+                </div>
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a class="btn btn-default">
+                    <router-link to="/">Cancel</router-link>
+                </a>
+            </form>
+        </div>
+    </template>
+
+    <template id="product-edit">
+        <div>
+            <h2>Edit product</h2>
+            <form @submit="updateProduct">
+                <div class="form-group">
+                    <label for="edit-name">Name</label>
+                    <input class="form-control" id="edit-name" v-model="product.name" required />
+                </div>
+                <div class="form-group">
+                    <label for="edit-description">Description</label>
+                    <textarea class="form-control" id="edit-description" rows="3"
+                        v-model="product.description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-price">Price, <span class="glyphicon glyphicon-euro"></span></label>
+                    <input type="number" class="form-control" id="edit-price" v-model="product.price" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-default">
+                    <router-link to="/">Cancel</router-link>
+                </a>
+            </form>
+        </div>
+    </template>
+
+    <template id="product-delete">
+        <div>
+            <h2>Delete product {{ product.name }}</h2>
+            <form @submit="deleteProduct">
+                <p>The action cannot be undone.</p>
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <a class="btn btn-default">
+                    <router-link to="/">Cancel</router-link>
+                </a>
+            </form>
+        </div>
+    </template>
+
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="js/exchange.js"></script>
+    <script src="https://unpkg.com/vue-router@3.0.2/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+    <script src="js/products.js"></script>
 
 </body>
 
